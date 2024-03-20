@@ -7,9 +7,8 @@
 .atom/
 .buildlog/
 .history
-.svn/
-E:\video_image_firebasestorage_app\assignment1\android\app\google-services.json
-E:\video_image_firebasestorage_app\assignment1\lib\firebase_options.dart
+.svn/ 
+ 
 migrate_working_dir/
 
 # IntelliJ related
@@ -32,7 +31,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-
+lib/firebase_options.dart
+android/app/google-services.json
 # Symbolication related
 app.*.symbols
 
