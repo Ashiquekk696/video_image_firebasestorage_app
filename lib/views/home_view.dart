@@ -1,102 +1,183 @@
 import 'dart:io';
 
-import 'package:assignment1/constants/colors.dart';
-import 'package:assignment1/controllers/home_controller.dart';
+import 'package:assignment1/widgets/button_widget.dart';
+import 'package:assignment1/widgets/video_display_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:assignment1/constants/colors.dart';
+import 'package:assignment1/constants/text_style.dart';
+import 'package:assignment1/controllers/home_controller.dart';
+
+import '../widgets/loader_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   final HomeController controller = Get.put(HomeController());
 
+  Widget buildGridView() {
+    return Expanded(
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
+        ),
+        itemCount: controller.imageFiles.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                controller.imageFiles[index],
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Scaffold(
+      () => Scaffold( 
+        backgroundColor: AppColors.black,
         appBar: AppBar(
           title: Text('File Upload'),
         ),
         body: controller.isLoading.value
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Please wait ...File is uploading",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 10),
-                    CircularProgressIndicator(color: AppColors.red),
-                  ],
-                ),
-              )
-            : Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    ElevatedButton.icon(
-                      onPressed: () => controller.pickFile(),
-                      icon: Icon(Icons.attach_file),
-                      label: Text('Select file'),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+            ? LoaderWidget()
+            : Container(
+                margin: EdgeInsets.symmetric(horizontal: 15),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(height: 10,),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        child: MyButtonWidget(
+                          onPressed: () => controller.pickFile(),
+                          icon: Icon(Icons.attach_file),
+                          label: Text('Select file'),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    Obx(() {
-                      if (controller.myFile.value != null) {
-                        File file = controller.myFile.value!;
-                        return Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              file,
-                              height: 300,
-                              width: 300,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        );
-                      } else {
-                        return SizedBox();
-                      }
-                    }),
-                    SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      onPressed: () {
+                      SizedBox(height: 20),
+                      Obx(() {
                         if (controller.myFile.value != null) {
-                          controller.uploadFile(controller.myFile.value!);
+                          File file = controller.myFile.value!;
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                file,
+                                height: 300,
+                                width: 300,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        } else {
+                          return SizedBox();
                         }
-                      },
-                      icon: Icon(Icons.upload),
-                      label: Text('Upload'),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      }), 
+                      Visibility(
+                        visible: controller.myFile.value!=null,
+                        child: SizedBox(height: 1,)),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        child: MyButtonWidget(
+                          onPressed: () {
+                            if (controller.myFile.value != null) {
+                              controller.uploadFile(controller.myFile.value!);
+                            }
+                          },
+                          icon: Icon(Icons.upload),
+                          label: Text('Upload'),
                         ),
                       ),
-                    ),
-                    Text(controller.hh.value??"ggg"),
-Image.network(controller.hh.value),
-                    Text(controller.imageFiles.last.toString())
-                  ],
+                      SizedBox(height: 25,),
+                      Visibility(
+                        visible: controller.imageFiles.isNotEmpty,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Uploaded Images",
+                              style: MyTextStyle.medium.copyWith(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 10,),
+                   //   Text(controller.videoFiles.first??"",style: TextStyle(color: Colors.white),),
+                      Visibility(
+                        visible: controller.imageFiles.isNotEmpty,
+                        child: buildGridView(),
+                      ),
+
+                          Visibility(
+                        visible: controller.videoFiles.isNotEmpty,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Uploaded Videos",
+                              style: MyTextStyle.medium.copyWith(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 10,),
+                      Visibility(
+                        visible: controller.videoFiles.isNotEmpty,
+                        child: myVideoGrid()),
+       
+                    ],
+                  ),
                 ),
               ),
       ),
     );
   }
+Widget myVideoGrid(){
+  return Expanded(
+    child: GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8.0,
+        mainAxisSpacing: 8.0,
+      ),
+      itemCount: controller.videoFiles.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: controller.videoFiles.value != null
+                ? VideoScreenWidget(
+                    videoUrl: controller.videoFiles[index],
+                  )
+                : Icon(
+                    Icons.video_library, // Icon to use as a placeholder
+                    size: 48, // Adjust the size of the icon as needed
+                    color: Colors.grey, // Adjust the color of the icon as needed
+                  ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
 }

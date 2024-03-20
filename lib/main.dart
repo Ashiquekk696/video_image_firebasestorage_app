@@ -18,11 +18,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Image Upload',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        primaryColor: Colors.black
       ),
       home: HomeScreen(),
     );
   }
 }
+ 

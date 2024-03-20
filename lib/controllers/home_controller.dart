@@ -9,12 +9,14 @@ import 'package:get/get.dart';
 class HomeController extends GetxController {
   Rx<File?> myFile = Rx<File?>(null);
   RxList<String> imageFiles = RxList<String>([]);
-  RxBool isLoading = false.obs; 
+  RxList<String> videoFiles = RxList<String>([]);
+  RxBool isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchImages();
+    fetchVideos();
   }
 
   Future<void> pickFile() async {
@@ -26,7 +28,6 @@ class HomeController extends GetxController {
           int fileSizeInBytes = await file.length();
           if (fileSizeInBytes <= 10 * 1024 * 1024) {
             myFile.value = file;
-           
           } else {
             Fluttertoast.showToast(
               msg: "File size exceeds 10MB. Please select a smaller file",
@@ -48,24 +49,26 @@ class HomeController extends GetxController {
     }
   }
 
-  // bool _isVideoFile(File file) {
-  //   String ext = file.path.split('.').last.toLowerCase();
-  //   return ext == 'mp4' || ext == 'mov' || ext == 'avi' || ext == 'mkv';
-  // }
+  bool _isVideoFile(File file) {
+    String ext = file.path.split('.').last.toLowerCase();
+    return ext == 'mp4' || ext == 'mov' || ext == 'avi' || ext == 'mkv';
+  }
 
   Future<void> uploadFile(File file) async {
     try {
       if (myFile.value != null) {
         isLoading.value = true;
         FirebaseStorage storage = FirebaseStorage.instance;
-        String bucketName = 
-        //_isVideoFile(file) ? 'videos' :
-         'images';
+        String bucketName =
+            _isVideoFile(file) ? 'videos' : 'images';
         Reference ref = storage.ref().child(bucketName).child('${DateTime.now()}.jpeg');
         await ref.putFile(file);
+        await fetchImages();
+        await fetchVideos(); // Update the videos list after uploading
         Fluttertoast.showToast(
           msg: "File uploaded successfully",
         );
+        myFile.value = null;
       } else {
         print('No file selected.');
         Fluttertoast.showToast(
@@ -83,23 +86,40 @@ class HomeController extends GetxController {
       isLoading.value = false;
     }
   }
-  var hh= "".obs;
 
-Future<void> fetchImages() async {
-  try {
-    FirebaseStorage storage = FirebaseStorage.instance;
-    ListResult result = await storage.ref('images').listAll();
-     // Change 'videos' to 'images'
-  
-    imageFiles.assignAll(result.items.map((item) => item.name).toList());
-       hh.value =await storage.ref('images').child(imageFiles.last).getDownloadURL();
-  } catch (e) {
-    print('Error fetching images: $e');
-    Fluttertoast.showToast(
-      msg: "Error fetching images",
-      backgroundColor: AppColors.red,
-    );
+  Future<void> fetchImages() async {
+    try {
+      FirebaseStorage storage = FirebaseStorage.instance;
+      ListResult result = await storage.ref('images').listAll();
+      imageFiles.clear(); // Clear existing image URLs
+      for (Reference ref in result.items) {
+        String downloadURL = await ref.getDownloadURL();
+        imageFiles.add(downloadURL);
+      }
+    } catch (e) {
+      print('Error fetching images: $e');
+      Fluttertoast.showToast(
+        msg: "Error fetching images",
+        backgroundColor: AppColors.red,
+      );
+    }
   }
-}
 
+  Future<void> fetchVideos() async {
+    try {
+      FirebaseStorage storage = FirebaseStorage.instance;
+      ListResult result = await storage.ref('videos').listAll();
+      videoFiles.clear(); // Clear existing video URLs
+      for (Reference ref in result.items) {
+        String downloadURL = await ref.getDownloadURL();
+        videoFiles.add(downloadURL);
+      }
+    } catch (e) {
+      print('Error fetching videos: $e');
+      Fluttertoast.showToast(
+        msg: "Error fetching videos",
+        backgroundColor: AppColors.red,
+      );
+    }
+  }
 }
