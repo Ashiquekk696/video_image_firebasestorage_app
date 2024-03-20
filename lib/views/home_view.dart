@@ -16,36 +16,35 @@ class HomeScreen extends StatelessWidget {
   final HomeController controller = Get.put(HomeController());
 
   Widget buildGridView() {
-    return Expanded(
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 8.0,
-          mainAxisSpacing: 8.0,
-        ),
-        itemCount: controller.imageFiles.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                controller.imageFiles[index],
-                fit: BoxFit.cover,
-              ),
-            ),
-          );
-        },
+    return GridView.builder(
+      shrinkWrap: true,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8.0,
+        mainAxisSpacing: 8.0,
       ),
+      itemCount: controller.imageFiles.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              controller.imageFiles[index],
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Scaffold( 
+      () => Scaffold(
         backgroundColor: AppColors.black,
         appBar: AppBar(
           title: Text('File Upload'),
@@ -58,7 +57,9 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(height: 10,),
+                      SizedBox(
+                        height: 10,
+                      ),
                       Container(
                         width: MediaQuery.of(context).size.width,
                         child: MyButtonWidget(
@@ -77,21 +78,28 @@ class HomeScreen extends StatelessWidget {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(
-                                file,
-                                height: 300,
-                                width: 300,
-                                fit: BoxFit.cover,
-                              ),
+                              child: controller.fileName.value != null
+                                  ? Text(
+                                      controller.fileName.value,
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : Image.file(
+                                      file,
+                                      height: 300,
+                                      width: 300,
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
                           );
                         } else {
                           return SizedBox();
                         }
-                      }), 
+                      }),
                       Visibility(
-                        visible: controller.myFile.value!=null,
-                        child: SizedBox(height: 1,)),
+                          visible: controller.myFile.value != null,
+                          child: SizedBox(
+                            height: 1,
+                          )),
                       Container(
                         width: MediaQuery.of(context).size.width,
                         child: MyButtonWidget(
@@ -104,7 +112,9 @@ class HomeScreen extends StatelessWidget {
                           label: Text('Upload'),
                         ),
                       ),
-                      SizedBox(height: 25,),
+                      SizedBox(
+                        height: 25,
+                      ),
                       Visibility(
                         visible: controller.imageFiles.isNotEmpty,
                         child: Row(
@@ -112,35 +122,42 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Text(
                               "Uploaded Images",
-                              style: MyTextStyle.medium.copyWith(color: Colors.white),
+                              style: MyTextStyle.medium
+                                  .copyWith(color: Colors.white),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 10,),
-                   //   Text(controller.videoFiles.first??"",style: TextStyle(color: Colors.white),),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      //   Text(controller.videoFiles.first??"",style: TextStyle(color: Colors.white),),
                       Visibility(
                         visible: controller.imageFiles.isNotEmpty,
                         child: buildGridView(),
                       ),
-
-                          Visibility(
+SizedBox(
+                        height: 25,
+                      ),
+                      Visibility(
                         visible: controller.videoFiles.isNotEmpty,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
                               "Uploaded Videos",
-                              style: MyTextStyle.medium.copyWith(color: Colors.white),
+                              style: MyTextStyle.medium
+                                  .copyWith(color: Colors.white),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 10,),
+                      SizedBox(
+                        height: 10,
+                      ),
                       Visibility(
-                        visible: controller.videoFiles.isNotEmpty,
-                        child: myVideoGrid()),
-       
+                          visible: controller.videoFiles.isNotEmpty,
+                          child: myVideoGrid()),
                     ],
                   ),
                 ),
@@ -148,9 +165,10 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-Widget myVideoGrid(){
-  return Expanded(
-    child: GridView.builder(
+
+  Widget myVideoGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 8.0,
@@ -165,19 +183,23 @@ Widget myVideoGrid(){
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: controller.videoFiles.value != null
-                ? VideoScreenWidget(
-                    videoUrl: controller.videoFiles[index],
-                  )
+                ? GestureDetector(
+                  onTap: (){
+                    Get.to(VideoDisplayWidget(videoUrl:  controller.videoFiles[index]));
+                  },
+                  child: VideoDisplayWidget(
+                      videoUrl: controller.videoFiles[index],
+                    ),
+                )
                 : Icon(
                     Icons.video_library, // Icon to use as a placeholder
                     size: 48, // Adjust the size of the icon as needed
-                    color: Colors.grey, // Adjust the color of the icon as needed
+                    color:
+                        Colors.grey, // Adjust the color of the icon as needed
                   ),
           ),
         );
       },
-    ),
-  );
-}
-
+    );
+  }
 }

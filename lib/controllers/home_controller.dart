@@ -11,6 +11,8 @@ class HomeController extends GetxController {
   RxList<String> imageFiles = RxList<String>([]);
   RxList<String> videoFiles = RxList<String>([]);
   RxBool isLoading = false.obs;
+  var fileName = "".obs;
+
 
   @override
   void onInit() {
@@ -28,6 +30,7 @@ class HomeController extends GetxController {
           int fileSizeInBytes = await file.length();
           if (fileSizeInBytes <= 10 * 1024 * 1024) {
             myFile.value = file;
+            _isVideoFile(file)?fileName.value=file.path:"";
           } else {
             Fluttertoast.showToast(
               msg: "File size exceeds 10MB. Please select a smaller file",
