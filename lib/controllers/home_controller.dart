@@ -94,13 +94,12 @@ class HomeController extends GetxController {
     try {
       FirebaseStorage storage = FirebaseStorage.instance;
       ListResult result = await storage.ref('images').listAll();
-      imageFiles.clear(); // Clear existing image URLs
+      imageFiles.clear(); 
       for (Reference ref in result.items) {
         String downloadURL = await ref.getDownloadURL();
         imageFiles.add(downloadURL);
       }
-    } catch (e) {
-      print('Error fetching images: $e');
+    } catch (e) { 
       Fluttertoast.showToast(
         msg: "Error fetching images",
         backgroundColor: AppColors.red,
